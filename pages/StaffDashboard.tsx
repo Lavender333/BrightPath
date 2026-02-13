@@ -98,6 +98,88 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusC
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const downloadCsv = (filename: string, rows: string[][]) => {
+    const csvText = rows
+      .map(cols => cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportStudentImpactCsv = () => {
+    const rows: string[][] = [[
+      'studentName',
+      'parentEmail',
+      'baselineDecision', 'baselineCommunication', 'baselineSelfManagement', 'baselineFinancial', 'baselineConfidence', 'baselineDate',
+      'midpointDecision', 'midpointCommunication', 'midpointSelfManagement', 'midpointFinancial', 'midpointConfidence', 'midpointDate',
+      'finalDecision', 'finalCommunication', 'finalSelfManagement', 'finalFinancial', 'finalConfidence', 'finalDate',
+      'improvedDomainsCount',
+    ]];
+
+    acceptedApps.forEach(app => {
+      const baseline = app.impact?.baseline;
+      const midpoint = app.impact?.midpoint;
+      const final = app.impact?.final;
+      const latest = final || midpoint || baseline;
+      const improvedDomains = baseline && latest
+        ? domains.reduce((count, domain) => count + (latest[domain] > baseline[domain] ? 1 : 0), 0)
+        : 0;
+
+      rows.push([
+        app.studentName,
+        app.parentEmail,
+        String(baseline?.decisionQuality ?? ''),
+        String(baseline?.communicationClarity ?? ''),
+        String(baseline?.selfManagement ?? ''),
+        String(baseline?.financialReasoning ?? ''),
+        String(baseline?.confidenceScore ?? ''),
+        baseline?.recordedAt ?? '',
+        String(midpoint?.decisionQuality ?? ''),
+        String(midpoint?.communicationClarity ?? ''),
+        String(midpoint?.selfManagement ?? ''),
+        String(midpoint?.financialReasoning ?? ''),
+        String(midpoint?.confidenceScore ?? ''),
+        midpoint?.recordedAt ?? '',
+        String(final?.decisionQuality ?? ''),
+        String(final?.communicationClarity ?? ''),
+        String(final?.selfManagement ?? ''),
+        String(final?.financialReasoning ?? ''),
+        String(final?.confidenceScore ?? ''),
+        final?.recordedAt ?? '',
+        String(improvedDomains),
+      ]);
+    });
+
+    downloadCsv('brightpath-impact-student-report.csv', rows);
+    setNotification('Student impact CSV exported.');
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const exportCohortSummaryCsv = () => {
+    const rows: string[][] = [
+      ['metric', 'value'],
+      ['accepted_students', String(acceptedApps.length)],
+      ['baseline_coverage', `${cohortCoverage.baseline}/${acceptedApps.length}`],
+      ['midpoint_coverage', `${cohortCoverage.midpoint}/${acceptedApps.length}`],
+      ['final_coverage', `${cohortCoverage.final}/${acceptedApps.length}`],
+      ['improved_3_plus_domains_rate_percent', String(improved3PlusRate)],
+      ['avg_gain_decision', String(avgGainByDomain[0])],
+      ['avg_gain_communication', String(avgGainByDomain[1])],
+      ['avg_gain_self_management', String(avgGainByDomain[2])],
+      ['avg_gain_financial_reasoning', String(avgGainByDomain[3])],
+      ['avg_gain_confidence', String(avgGainByDomain[4])],
+    ];
+
+    downloadCsv('brightpath-impact-cohort-summary.csv', rows);
+    setNotification('Cohort summary CSV exported.');
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const navItems = [
     { id: 'cohort', label: 'Cohort Overview' },
     { id: 'inbox', label: 'Candidates' },
@@ -133,7 +215,19 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusC
             <div className="bg-white border border-primary/5 p-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 <h3 className="text-2xl font-serif text-primary">Cohort Growth Snapshot (Baseline → Latest)</h3>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={exportStudentImpactCsv}
+                    className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold border border-primary/20 hover:border-accent hover:text-accent"
+                  >
+                    Export Student CSV
+                  </button>
+                  <button
+                    onClick={exportCohortSummaryCsv}
+                    className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold border border-primary/20 hover:border-accent hover:text-accent"
+                  >
+                    Export Cohort CSV
+                  </button>
                   {(['baseline', 'midpoint', 'final'] as ImpactStage[]).map(stage => (
                     <button
                       key={stage}
