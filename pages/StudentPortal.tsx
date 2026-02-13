@@ -96,25 +96,25 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
   const daysLeft = 21; 
   
   const portfolioPages = [
-    { week: 1, title: 'Identity Map', description: 'Executive Framing' },
-    { week: 2, title: 'Value Model', description: 'Systems Intelligence' },
-    { week: 3, title: 'Friction Audit', description: 'Opportunity Diagnosis' },
-    { week: 4, title: 'Status Update', description: 'Peer Briefing' },
-    { week: 5, title: 'Decision Matrix', description: 'Weighted Logic' },
-    { week: 6, title: 'Executive Slide', description: 'High-Fidelity Briefs' },
-    { week: 7, title: 'AI Pitch', description: 'Authority Practice' },
-    { week: 8, title: 'Final Expansion', description: 'Portfolio Synthesis' },
+    { week: 1, title: 'My Strength Map', description: 'Know Your Superpowers' },
+    { week: 2, title: 'Money Choices Lab', description: 'Needs vs Wants' },
+    { week: 3, title: 'Fix-It Challenge', description: 'Spot Small Problems' },
+    { week: 4, title: 'Team Update', description: 'Share Your Progress' },
+    { week: 5, title: 'Choice Scorecard', description: 'Pick the Best Option' },
+    { week: 6, title: 'One-Slide Story', description: 'Explain Clearly' },
+    { week: 7, title: 'Practice Pitch', description: 'Confident Speaking' },
+    { week: 8, title: 'Final Showcase', description: 'Celebrate Growth' },
   ];
 
   const curriculumMap: Record<number, any> = {
-    1: { title: "Who Are You Becoming?", sections: [{ header: "Facilitator Brief", body: "Executive identity starts with framing. You are no longer a student following instructions; you are a strategist identifying opportunities." }], task: "Draft your 1-year goal map." },
-    2: { title: "How Value Works", sections: [{ header: "The Value Loop", body: "Capital flows toward clarity. Learn how resources transform into impact and how to recognize strategic patience." }], task: "Analyze a community investment." },
-    3: { title: "Spotting Real Opportunities", sections: [{ header: "The Friction Audit", body: "Opportunities are diagnosed, not found. Learn to see the friction in daily systems that others ignore." }], task: "Document 3 friction points." },
-    4: { title: "Live Strategy Workshop", sections: [{ header: "Briefing Your Peers", body: "Communication is the final step of strategy. In this live session, you will learn to navigate peer feedback with composure." }], task: "Prepare a status update." },
-    5: { title: "Making Decisions Clearly", sections: [{ header: "The Decision Matrix", body: "Elite decisions are computed. Use objective, weighted criteria to justify your focus." }], task: "Create a matrix for a high-stakes scenario." },
-    6: { title: "Explaining Your Idea Clearly", sections: [{ header: "The Executive Brief", body: "Clarity is authority. Structure your narrative into five distinct parts for maximum cognitive impact." }], task: "Summarize your strategy in 5 points." },
-    7: { title: "Pitch Practice (Live)", sections: [{ header: "The Calm Pause", body: "Presence is about the space between words. Practice maintaining authority during high-pressure Q&A." }], task: "Engage with the Live AI Mentor." },
-    8: { title: "Final Reflection & Polish", sections: [{ header: "Portfolio Synthesis", body: "Your 8-week journey concludes. Consolidate your growth into a final 12-page expansion strategy." }], task: "Finalize your portfolio." }
+    1: { title: "Who Are You Becoming?", sections: [{ header: "Facilitator Brief", body: "Great leaders know themselves first. This week, you will name your strengths and set one clear goal you can work on every week." }], task: "Make a 1-page Strength + Goal Map (3 strengths, 1 goal, 3 action steps)." },
+    2: { title: "How Value Works", sections: [{ header: "The Value Loop", body: "Money is about choices. You will practice telling the difference between needs and wants, then decide how to spend a small budget wisely." }], task: "Use a $20 pretend budget and explain how you would spend, save, and give." },
+    3: { title: "Spotting Real Opportunities", sections: [{ header: "The Friction Audit", body: "Everyday annoyances are clues to good ideas. You will spot problems at home or school and choose one that is realistic for a kid to improve." }], task: "List 3 problems you notice and pick 1 to improve this month." },
+    4: { title: "Live Strategy Workshop", sections: [{ header: "Briefing Your Peers", body: "Strong communicators are clear and kind. In this live session, you will share your update in under 2 minutes and ask one thoughtful question." }], task: "Prepare a short update: What I tried, what worked, what I will do next." },
+    5: { title: "Making Decisions Clearly", sections: [{ header: "The Decision Matrix", body: "Big choices get easier when you score your options. You will use simple points (1–5) to compare ideas and choose your best next step." }], task: "Create a 3-choice scorecard and explain why your top choice wins." },
+    6: { title: "Explaining Your Idea Clearly", sections: [{ header: "The Executive Brief", body: "If you can explain it simply, you understand it. This week, you will turn your idea into one clear slide with a title, plan, and impact." }], task: "Build a one-slide brief: Problem, Idea, Plan, and Why it matters." },
+    7: { title: "Pitch Practice (Live)", sections: [{ header: "The Calm Pause", body: "Confident speakers slow down and breathe. You will practice your 60–90 second pitch and answer two follow-up questions with calm focus." }], task: "Practice with the AI mentor and submit your best 60–90 second pitch." },
+    8: { title: "Final Reflection & Polish", sections: [{ header: "Portfolio Synthesis", body: "You have built real skills. Now you will show your growth with your best work samples and a short reflection on what you learned." }], task: "Submit your final mini-portfolio (best 3 artifacts + 1 reflection paragraph)." }
   };
 
   const closeOverlay = () => {

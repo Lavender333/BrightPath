@@ -6,14 +6,14 @@ import FAQSection from '../components/FAQSection';
 
 const Program: React.FC = () => {
   const curriculum = [
-    { week: 1, title: 'Who Are You Becoming?', desc: 'Executive Identity Framing. Setting the "BrightPath Standard" and building the Leadership Map.', live: false },
-    { week: 2, title: 'How Value Works', desc: 'The Systems of Value. Understanding trade-offs, strategic patience, and financial flows.', live: false },
-    { week: 3, title: 'Spotting Real Opportunities', desc: 'Diagnostic Observation. Learning to notice patterns and identify problems worth solving.', live: false },
-    { week: 4, title: 'Live Strategy Workshop', desc: 'Live Cohort Session. Explaining your thinking clearly and navigating structured peer feedback.', live: true },
-    { week: 5, title: 'Making Decisions Clearly', desc: 'Decision Matrix Frameworks. Using weighted criteria to compare options and justify focus.', live: false },
-    { week: 6, title: 'Explaining Your Idea Clearly', desc: 'The Executive Brief. Structuring a 5-part narrative to articulate value and clarity.', live: false },
-    { week: 7, title: 'Pitch Practice (Live)', desc: 'Live Session. Rehearsing the "Calm Pause" and navigating Q&A under focused pressure.', live: true },
-    { week: 8, title: 'Final Reflection & Polish', desc: 'Portfolio Synthesis. Finalizing the expansion strategy document and identity expansion.', live: false },
+    { week: 1, title: 'Who Are You Becoming?', desc: 'Strengths + Goal Mapping. Students identify 3 strengths and build one age-appropriate growth goal.', live: false },
+    { week: 2, title: 'How Value Works', desc: 'Money Choices Lab. Students practice needs vs wants using simple budget scenarios they can relate to.', live: false },
+    { week: 3, title: 'Spotting Real Opportunities', desc: 'Fix-It Thinking. Students spot everyday problems at school/home and choose one realistic solution.', live: false },
+    { week: 4, title: 'Live Strategy Workshop', desc: 'Live Cohort Session. Students share a short progress update and practice giving respectful peer feedback.', live: true },
+    { week: 5, title: 'Making Decisions Clearly', desc: 'Choice Scorecards. Students compare 2-3 options with simple scoring to justify a decision.', live: false },
+    { week: 6, title: 'Explaining Your Idea Clearly', desc: 'One-Slide Brief. Students organize their idea into a clear, kid-friendly structure.', live: false },
+    { week: 7, title: 'Pitch Practice (Live)', desc: 'Live Session. Students rehearse a 60-90 second pitch and respond to guided Q&A with confidence.', live: true },
+    { week: 8, title: 'Final Reflection & Polish', desc: 'Showcase Portfolio. Students submit their best work samples and reflect on personal growth.', live: false },
   ];
 
   const deliverySpecs = [
