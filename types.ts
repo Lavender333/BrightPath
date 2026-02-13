@@ -14,6 +14,24 @@ export enum Page {
 
 export type ApplicationStatus = 'Applied' | 'Accepted' | 'Waitlisted' | 'Declined';
 
+export type ImpactStage = 'baseline' | 'midpoint' | 'final';
+
+export interface ImpactSnapshot {
+  decisionQuality: 1 | 2 | 3 | 4;
+  communicationClarity: 1 | 2 | 3 | 4;
+  selfManagement: 1 | 2 | 3 | 4;
+  financialReasoning: 1 | 2 | 3 | 4;
+  confidenceScore: 1 | 2 | 3 | 4;
+  notes?: string;
+  recordedAt: string;
+}
+
+export interface ImpactAssessment {
+  baseline?: ImpactSnapshot;
+  midpoint?: ImpactSnapshot;
+  final?: ImpactSnapshot;
+}
+
 export interface Message {
   id: string;
   sender: 'Staff' | 'Parent';
@@ -44,4 +62,5 @@ export interface Application {
   note: string;
   messages: Message[];
   submissions: Submission[];
+  impact?: ImpactAssessment;
 }

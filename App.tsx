@@ -13,7 +13,7 @@ import Sponsor from './pages/Sponsor';
 import Login from './pages/Login';
 import StaffDashboard from './pages/StaffDashboard';
 import StudentPortal from './pages/StudentPortal';
-import { Page, Application, Message, Submission } from './types';
+import { Page, Application, Submission, ImpactStage, ImpactSnapshot } from './types';
 
 const APPS_STORAGE_KEY = 'brightpath_apps_v1';
 const SESSION_STORAGE_KEY = 'brightpath_session_v1';
@@ -166,6 +166,19 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleImpactUpdate = (appId: string, stage: ImpactStage, snapshot: ImpactSnapshot) => {
+    setApps(prev => prev.map(a => a.id === appId
+      ? {
+          ...a,
+          impact: {
+            ...(a.impact || {}),
+            [stage]: snapshot,
+          },
+        }
+      : a
+    ));
+  };
+
   return (
     <HashRouter>
       <div className="flex flex-col min-h-screen font-sans">
@@ -187,6 +200,7 @@ const App: React.FC = () => {
                 applications={apps} 
                 onStatusChange={updateAppStatus} 
                 onGiveFeedback={handleFeedback}
+                onSaveImpact={handleImpactUpdate}
               />
             } />
             <Route path="/portal" element={

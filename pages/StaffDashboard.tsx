@@ -1,19 +1,31 @@
 
 import React, { useState } from 'react';
-import { Application } from '../types';
+import { Application, ImpactSnapshot, ImpactStage } from '../types';
 
 interface StaffDashboardProps {
   applications: Application[];
   onStatusChange: (id: string, status: Application['status']) => void;
   onGiveFeedback: (appId: string, week: number, feedback: string, needsRevision: boolean, revisionPrompt?: string) => void;
+  onSaveImpact: (appId: string, stage: ImpactStage, snapshot: ImpactSnapshot) => void;
 }
 
-const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusChange, onGiveFeedback }) => {
+const emptyImpactSnapshot = (): Omit<ImpactSnapshot, 'recordedAt'> => ({
+  decisionQuality: 2,
+  communicationClarity: 2,
+  selfManagement: 2,
+  financialReasoning: 2,
+  confidenceScore: 2,
+  notes: '',
+});
+
+const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusChange, onGiveFeedback, onSaveImpact }) => {
   const [activeView, setActiveView] = useState('submissions');
   const [notification, setNotification] = useState<string | null>(null);
   const [feedbackInputs, setFeedbackInputs] = useState<Record<string, string>>({});
   const [revisionInputs, setRevisionInputs] = useState<Record<string, string>>({});
   const [reviewModes, setReviewModes] = useState<Record<string, 'reviewed' | 'needs-revision'>>({});
+  const [impactStage, setImpactStage] = useState<ImpactStage>('baseline');
+  const [impactDrafts, setImpactDrafts] = useState<Record<string, Omit<ImpactSnapshot, 'recordedAt'>>>({});
 
   const handleStatusUpdate = (id: string, status: Application['status']) => {
     onStatusChange(id, status);
@@ -38,6 +50,54 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusC
     }
   };
 
+  const acceptedApps = applications.filter(a => a.status === 'Accepted');
+  const domains: Array<keyof Omit<ImpactSnapshot, 'notes' | 'recordedAt'>> = [
+    'decisionQuality',
+    'communicationClarity',
+    'selfManagement',
+    'financialReasoning',
+    'confidenceScore',
+  ];
+
+  const getLatestSnapshot = (app: Application) => app.impact?.final || app.impact?.midpoint || app.impact?.baseline;
+
+  const gainRows = acceptedApps
+    .map(app => {
+      const baseline = app.impact?.baseline;
+      const latest = getLatestSnapshot(app);
+      if (!baseline || !latest) return null;
+      const gains = domains.map(d => latest[d] - baseline[d]);
+      return { app, gains, improvedDomains: gains.filter(g => g > 0).length };
+    })
+    .filter(Boolean) as Array<{ app: Application; gains: number[]; improvedDomains: number }>;
+
+  const cohortCoverage = {
+    baseline: acceptedApps.filter(a => a.impact?.baseline).length,
+    midpoint: acceptedApps.filter(a => a.impact?.midpoint).length,
+    final: acceptedApps.filter(a => a.impact?.final).length,
+  };
+
+  const avgGainByDomain = domains.map((_, idx) => {
+    if (!gainRows.length) return 0;
+    const total = gainRows.reduce((sum, row) => sum + row.gains[idx], 0);
+    return Number((total / gainRows.length).toFixed(2));
+  });
+
+  const improved3PlusRate = gainRows.length
+    ? Math.round((gainRows.filter(r => r.improvedDomains >= 3).length / gainRows.length) * 100)
+    : 0;
+
+  const saveImpactSnapshot = (app: Application) => {
+    const draft = impactDrafts[app.id] || emptyImpactSnapshot();
+    const snapshot: ImpactSnapshot = {
+      ...draft,
+      recordedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    };
+    onSaveImpact(app.id, impactStage, snapshot);
+    setNotification(`Saved ${impactStage} rubric for ${app.studentName}.`);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const navItems = [
     { id: 'cohort', label: 'Cohort Overview' },
     { id: 'inbox', label: 'Candidates' },
@@ -48,6 +108,131 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusC
 
   const renderContent = () => {
     switch(activeView) {
+      case 'cohort':
+        return (
+          <div className="space-y-10 fade-in">
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="bg-white border border-primary/5 p-6">
+                <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">Accepted Students</p>
+                <p className="text-3xl font-serif text-primary mt-2">{acceptedApps.length}</p>
+              </div>
+              <div className="bg-white border border-primary/5 p-6">
+                <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">Baseline Coverage</p>
+                <p className="text-3xl font-serif text-primary mt-2">{cohortCoverage.baseline}/{acceptedApps.length}</p>
+              </div>
+              <div className="bg-white border border-primary/5 p-6">
+                <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">Final Coverage</p>
+                <p className="text-3xl font-serif text-primary mt-2">{cohortCoverage.final}/{acceptedApps.length}</p>
+              </div>
+              <div className="bg-white border border-primary/5 p-6">
+                <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">Improved 3+ Domains</p>
+                <p className="text-3xl font-serif text-green-700 mt-2">{improved3PlusRate}%</p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-primary/5 p-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <h3 className="text-2xl font-serif text-primary">Cohort Growth Snapshot (Baseline → Latest)</h3>
+                <div className="flex gap-2">
+                  {(['baseline', 'midpoint', 'final'] as ImpactStage[]).map(stage => (
+                    <button
+                      key={stage}
+                      onClick={() => setImpactStage(stage)}
+                      className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold border ${impactStage === stage ? 'bg-accent text-white border-accent' : 'border-primary/20 opacity-70'}`}
+                    >
+                      Record {stage}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid md:grid-cols-5 gap-3 text-center">
+                <div className="p-4 bg-bgSoft border border-primary/5">
+                  <p className="text-[10px] uppercase tracking-widest opacity-40">Decision</p>
+                  <p className="text-2xl font-serif mt-1">{avgGainByDomain[0]}</p>
+                </div>
+                <div className="p-4 bg-bgSoft border border-primary/5">
+                  <p className="text-[10px] uppercase tracking-widest opacity-40">Communication</p>
+                  <p className="text-2xl font-serif mt-1">{avgGainByDomain[1]}</p>
+                </div>
+                <div className="p-4 bg-bgSoft border border-primary/5">
+                  <p className="text-[10px] uppercase tracking-widest opacity-40">Self-Management</p>
+                  <p className="text-2xl font-serif mt-1">{avgGainByDomain[2]}</p>
+                </div>
+                <div className="p-4 bg-bgSoft border border-primary/5">
+                  <p className="text-[10px] uppercase tracking-widest opacity-40">Financial</p>
+                  <p className="text-2xl font-serif mt-1">{avgGainByDomain[3]}</p>
+                </div>
+                <div className="p-4 bg-bgSoft border border-primary/5">
+                  <p className="text-[10px] uppercase tracking-widest opacity-40">Confidence</p>
+                  <p className="text-2xl font-serif mt-1">{avgGainByDomain[4]}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {acceptedApps.map(app => {
+                const existing = app.impact?.[impactStage];
+                const draft = impactDrafts[app.id] || {
+                  ...(existing || emptyImpactSnapshot()),
+                };
+                return (
+                  <div key={app.id} className="bg-white border border-primary/5 p-8">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
+                      <h4 className="text-2xl font-serif text-primary">{app.studentName}</h4>
+                      <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">
+                        Recording: {impactStage} {existing?.recordedAt ? `• Last saved ${existing.recordedAt}` : ''}
+                      </p>
+                    </div>
+                    <div className="grid md:grid-cols-5 gap-3 mb-4">
+                      {[
+                        { key: 'decisionQuality', label: 'Decision' },
+                        { key: 'communicationClarity', label: 'Communication' },
+                        { key: 'selfManagement', label: 'Self-Manage' },
+                        { key: 'financialReasoning', label: 'Financial' },
+                        { key: 'confidenceScore', label: 'Confidence' },
+                      ].map(field => (
+                        <div key={field.key} className="border border-primary/10 p-3 bg-bgSoft">
+                          <label className="block text-[10px] uppercase tracking-widest font-bold opacity-40 mb-2">{field.label}</label>
+                          <select
+                            value={draft[field.key as keyof Omit<ImpactSnapshot, 'recordedAt'>] as number}
+                            onChange={(e) => {
+                              const value = Number(e.target.value) as 1 | 2 | 3 | 4;
+                              setImpactDrafts(prev => ({
+                                ...prev,
+                                [app.id]: {
+                                  ...draft,
+                                  [field.key]: value,
+                                },
+                              }));
+                            }}
+                            className="w-full bg-white border border-primary/20 p-2 text-sm"
+                          >
+                            <option value={1}>1 - Emerging</option>
+                            <option value={2}>2 - Developing</option>
+                            <option value={3}>3 - Proficient</option>
+                            <option value={4}>4 - Advanced</option>
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                    <textarea
+                      value={draft.notes || ''}
+                      onChange={(e) => setImpactDrafts(prev => ({ ...prev, [app.id]: { ...draft, notes: e.target.value } }))}
+                      placeholder="Observation notes: behavior evidence, growth examples, and next support step..."
+                      className="w-full border border-primary/10 p-4 text-sm mb-4"
+                    />
+                    <button
+                      onClick={() => saveImpactSnapshot(app)}
+                      className="bg-primary text-white px-6 py-3 text-[10px] uppercase tracking-[0.25em] font-bold hover:bg-accent"
+                    >
+                      Save {impactStage} Rubric
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
       case 'submissions':
         return (
           <div className="space-y-12 fade-in">
