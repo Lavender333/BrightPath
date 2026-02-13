@@ -25,8 +25,10 @@ export interface Submission {
   week: number;
   title: string;
   content: string; // The student's work
-  status: 'Draft' | 'Submitted' | 'Reviewed';
+  status: 'Draft' | 'Submitted' | 'Reviewed' | 'Needs Revision';
   feedback?: string;
+  revisionPrompt?: string;
+  revisedAt?: string;
   submittedAt?: string;
 }
 

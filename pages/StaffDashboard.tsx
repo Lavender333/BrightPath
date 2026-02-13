@@ -5,13 +5,15 @@ import { Application } from '../types';
 interface StaffDashboardProps {
   applications: Application[];
   onStatusChange: (id: string, status: Application['status']) => void;
-  onGiveFeedback: (appId: string, week: number, feedback: string) => void;
+  onGiveFeedback: (appId: string, week: number, feedback: string, needsRevision: boolean, revisionPrompt?: string) => void;
 }
 
 const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusChange, onGiveFeedback }) => {
   const [activeView, setActiveView] = useState('submissions');
   const [notification, setNotification] = useState<string | null>(null);
   const [feedbackInputs, setFeedbackInputs] = useState<Record<string, string>>({});
+  const [revisionInputs, setRevisionInputs] = useState<Record<string, string>>({});
+  const [reviewModes, setReviewModes] = useState<Record<string, 'reviewed' | 'needs-revision'>>({});
 
   const handleStatusUpdate = (id: string, status: Application['status']) => {
     onStatusChange(id, status);
@@ -20,11 +22,18 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusC
   };
 
   const submitFeedback = (appId: string, week: number) => {
-    const feedback = feedbackInputs[`${appId}-${week}`];
+    const key = `${appId}-${week}`;
+    const feedback = feedbackInputs[key];
+    const mode = reviewModes[key] || 'reviewed';
+    const needsRevision = mode === 'needs-revision';
+    const revisionPrompt = revisionInputs[key];
+
     if (feedback) {
-      onGiveFeedback(appId, week, feedback);
-      setNotification(`Analysis published to student portal.`);
-      setFeedbackInputs(prev => ({ ...prev, [`${appId}-${week}`]: '' }));
+      onGiveFeedback(appId, week, feedback, needsRevision, revisionPrompt);
+      setNotification(needsRevision ? `Revision requested and published to student portal.` : `Analysis published to student portal.`);
+      setFeedbackInputs(prev => ({ ...prev, [key]: '' }));
+      setRevisionInputs(prev => ({ ...prev, [key]: '' }));
+      setReviewModes(prev => ({ ...prev, [key]: 'reviewed' }));
       setTimeout(() => setNotification(null), 3000);
     }
   };
@@ -65,29 +74,59 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ applications, onStatusC
                             <span className="text-[10px] uppercase font-bold text-accent tracking-[0.4em]">Laboratory W.0{sub.week}: {sub.title}</span>
                             <span className="text-[9px] opacity-30 font-bold uppercase tracking-widest">{sub.submittedAt}</span>
                           </div>
+                          <div className="mb-4">
+                            <span className={`px-3 py-1 text-[9px] uppercase tracking-widest font-bold rounded-sm border ${sub.status === 'Reviewed' ? 'bg-green-50 text-green-700 border-green-200' : sub.status === 'Needs Revision' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-primary/5 text-primary/60 border-primary/10'}`}>
+                              {sub.status}
+                            </span>
+                          </div>
                           <div className="bg-white p-8 border border-primary/5 shadow-inner">
                              <p className="text-base leading-relaxed text-primary/70 whitespace-pre-wrap font-serif italic">"{sub.content}"</p>
                           </div>
                         </div>
                         <div className="flex flex-col">
                           <label className="text-[10px] uppercase font-bold opacity-30 mb-4 tracking-widest">Facilitator Diagnosis</label>
-                          {sub.status === 'Reviewed' ? (
+                          {(sub.status === 'Reviewed' || sub.status === 'Needs Revision') ? (
                             <div className="bg-white p-8 border border-accent/20 italic text-sm opacity-70 font-serif leading-relaxed">
-                              {sub.feedback}
+                              <p>{sub.feedback}</p>
+                              {sub.status === 'Needs Revision' && sub.revisionPrompt && (
+                                <p className="not-italic mt-4 text-[11px] uppercase tracking-widest font-bold opacity-60">Next step: {sub.revisionPrompt}</p>
+                              )}
                             </div>
                           ) : (
                             <>
+                              <div className="grid grid-cols-2 gap-3 mb-4">
+                                <button
+                                  onClick={() => setReviewModes(prev => ({ ...prev, [`${app.id}-${sub.week}`]: 'reviewed' }))}
+                                  className={`py-3 text-[10px] uppercase tracking-widest font-bold border ${ (reviewModes[`${app.id}-${sub.week}`] || 'reviewed') === 'reviewed' ? 'bg-green-50 border-green-300 text-green-700' : 'border-primary/20 opacity-60'}`}
+                                >
+                                  Mark Reviewed
+                                </button>
+                                <button
+                                  onClick={() => setReviewModes(prev => ({ ...prev, [`${app.id}-${sub.week}`]: 'needs-revision' }))}
+                                  className={`py-3 text-[10px] uppercase tracking-widest font-bold border ${ (reviewModes[`${app.id}-${sub.week}`] || 'reviewed') === 'needs-revision' ? 'bg-amber-50 border-amber-300 text-amber-700' : 'border-primary/20 opacity-60'}`}
+                                >
+                                  Request Revision
+                                </button>
+                              </div>
                               <textarea 
                                 value={feedbackInputs[`${app.id}-${sub.week}`] || ''}
                                 onChange={e => setFeedbackInputs({...feedbackInputs, [`${app.id}-${sub.week}`]: e.target.value})}
                                 placeholder="Enter executive feedback..."
                                 className="flex-grow bg-white border border-primary/10 p-6 text-sm focus:border-accent outline-none font-sans shadow-sm"
                               />
+                              {(reviewModes[`${app.id}-${sub.week}`] || 'reviewed') === 'needs-revision' && (
+                                <textarea
+                                  value={revisionInputs[`${app.id}-${sub.week}`] || ''}
+                                  onChange={e => setRevisionInputs({ ...revisionInputs, [`${app.id}-${sub.week}`]: e.target.value })}
+                                  placeholder="Add one clear next-step prompt for the student..."
+                                  className="mt-4 bg-white border border-amber-200 p-6 text-sm focus:border-amber-400 outline-none font-sans shadow-sm"
+                                />
+                              )}
                               <button 
                                 onClick={() => submitFeedback(app.id, sub.week)}
                                 className="mt-6 bg-primary text-white py-4 text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-accent transition-all"
                               >
-                                Publish Review
+                                Publish to Student
                               </button>
                             </>
                           )}

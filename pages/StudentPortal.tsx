@@ -90,10 +90,46 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
 
   // TTS State
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [simpleMode, setSimpleMode] = useState<boolean>(() => localStorage.getItem('bp_simple_mode') === '1');
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [checklistState, setChecklistState] = useState<Record<string, boolean>>(() => {
+    const stored = localStorage.getItem('bp_checklists_v1');
+    if (!stored) return {};
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return {};
+    }
+  });
+
+  const aiAvailable = !!(process.env.API_KEY || process.env.GEMINI_API_KEY);
+
+  useEffect(() => {
+    localStorage.setItem('bp_simple_mode', simpleMode ? '1' : '0');
+  }, [simpleMode]);
+
+  useEffect(() => {
+    localStorage.setItem('bp_checklists_v1', JSON.stringify(checklistState));
+  }, [checklistState]);
+
+  const reviewedCount = application?.submissions.filter(s => s.status === 'Reviewed').length || 0;
+  const inRevisionCount = application?.submissions.filter(s => s.status === 'Needs Revision').length || 0;
+  const submittedWeeks = new Set(application?.submissions.map(s => s.week) || []);
+  const streak = [1,2,3,4,5,6,7,8].reduce((count, week) => submittedWeeks.has(week) ? count + 1 : count, 0);
 
   // Dashboard Metrics
   const currentWeek = application?.submissions.length ? Math.min(application.submissions.length + 1, 8) : 1;
   const daysLeft = 21; 
+
+  useEffect(() => {
+    const key = `bp_reviewed_count_${application?.id || 'unknown'}`;
+    const prior = Number(localStorage.getItem(key) || '0');
+    if (reviewedCount > prior) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 3000);
+    }
+    localStorage.setItem(key, String(reviewedCount));
+  }, [reviewedCount, application?.id]);
   
   const portfolioPages = [
     { week: 1, title: 'My Strength Map', description: 'Know Your Superpowers' },
@@ -107,14 +143,86 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
   ];
 
   const curriculumMap: Record<number, any> = {
-    1: { title: "Who Are You Becoming?", sections: [{ header: "Facilitator Brief", body: "Great leaders know themselves first. This week, you will name your strengths and set one clear goal you can work on every week." }], task: "Make a 1-page Strength + Goal Map (3 strengths, 1 goal, 3 action steps)." },
-    2: { title: "How Value Works", sections: [{ header: "The Value Loop", body: "Money is about choices. You will practice telling the difference between needs and wants, then decide how to spend a small budget wisely." }], task: "Use a $20 pretend budget and explain how you would spend, save, and give." },
-    3: { title: "Spotting Real Opportunities", sections: [{ header: "The Friction Audit", body: "Everyday annoyances are clues to good ideas. You will spot problems at home or school and choose one that is realistic for a kid to improve." }], task: "List 3 problems you notice and pick 1 to improve this month." },
-    4: { title: "Live Strategy Workshop", sections: [{ header: "Briefing Your Peers", body: "Strong communicators are clear and kind. In this live session, you will share your update in under 2 minutes and ask one thoughtful question." }], task: "Prepare a short update: What I tried, what worked, what I will do next." },
-    5: { title: "Making Decisions Clearly", sections: [{ header: "The Decision Matrix", body: "Big choices get easier when you score your options. You will use simple points (1–5) to compare ideas and choose your best next step." }], task: "Create a 3-choice scorecard and explain why your top choice wins." },
-    6: { title: "Explaining Your Idea Clearly", sections: [{ header: "The Executive Brief", body: "If you can explain it simply, you understand it. This week, you will turn your idea into one clear slide with a title, plan, and impact." }], task: "Build a one-slide brief: Problem, Idea, Plan, and Why it matters." },
-    7: { title: "Pitch Practice (Live)", sections: [{ header: "The Calm Pause", body: "Confident speakers slow down and breathe. You will practice your 60–90 second pitch and answer two follow-up questions with calm focus." }], task: "Practice with the AI mentor and submit your best 60–90 second pitch." },
-    8: { title: "Final Reflection & Polish", sections: [{ header: "Portfolio Synthesis", body: "You have built real skills. Now you will show your growth with your best work samples and a short reflection on what you learned." }], task: "Submit your final mini-portfolio (best 3 artifacts + 1 reflection paragraph)." }
+    1: {
+      title: "Who Are You Becoming?",
+      sections: [{ header: "Facilitator Brief", body: "Great leaders know themselves first. This week, you will name your strengths and set one clear goal you can work on every week." }],
+      task: "Make a 1-page Strength + Goal Map (3 strengths, 1 goal, 3 action steps).",
+      timeEstimate: "20-30 minutes",
+      checklist: ["Name 3 strengths", "Write 1 clear goal", "Add 3 action steps you can do this week"],
+      example: "My strengths are listening, creativity, and staying calm. My goal is to improve my class presentation confidence. This week I will practice twice, ask for feedback, and write key points.",
+      parentSupport: ["Ask your child to explain their goal in one sentence", "Celebrate effort, not perfection", "Help schedule two short practice times"],
+      fallback: "If AI tools are offline, record your pitch using your phone and upload notes instead."
+    },
+    2: {
+      title: "How Value Works",
+      sections: [{ header: "The Value Loop", body: "Money is about choices. You will practice telling the difference between needs and wants, then decide how to spend a small budget wisely." }],
+      task: "Use a $20 pretend budget and explain how you would spend, save, and give.",
+      timeEstimate: "25-35 minutes",
+      checklist: ["List at least 2 needs and 2 wants", "Split $20 into spend/save/give", "Explain one trade-off choice"],
+      example: "I would spend $8 on school supplies, save $8 for a future need, and give $4 to a community cause.",
+      parentSupport: ["Discuss one real family trade-off this week", "Ask your child why they chose save/give amounts", "Praise clear reasoning"],
+      fallback: "If AI is unavailable, use paper and pencil to create your budget chart."
+    },
+    3: {
+      title: "Spotting Real Opportunities",
+      sections: [{ header: "The Friction Audit", body: "Everyday annoyances are clues to good ideas. You will spot problems at home or school and choose one that is realistic for a kid to improve." }],
+      task: "List 3 problems you notice and pick 1 to improve this month.",
+      timeEstimate: "20-30 minutes",
+      checklist: ["Find 3 small real-life problems", "Pick 1 problem you can influence", "Write one simple solution to test"],
+      example: "Problem: Backpacks block the classroom aisle. Solution: create a labeled backpack zone near the wall.",
+      parentSupport: ["Take a 10-minute observation walk together", "Help narrow to one realistic problem", "Ask: what is one next action?"],
+      fallback: "If audio mentor is unavailable, use the written reflection prompts only."
+    },
+    4: {
+      title: "Live Strategy Workshop",
+      sections: [{ header: "Briefing Your Peers", body: "Strong communicators are clear and kind. In this live session, you will share your update in under 2 minutes and ask one thoughtful question." }],
+      task: "Prepare a short update: What I tried, what worked, what I will do next.",
+      timeEstimate: "15-20 minutes prep + live session",
+      checklist: ["Keep update under 2 minutes", "Share one success and one challenge", "Ask one respectful question"],
+      example: "I tested my idea with 2 classmates. It worked because instructions were clear. Next, I will make a visual guide.",
+      parentSupport: ["Practice once at home with a timer", "Encourage eye contact and slow pace", "Use one positive + one growth comment"],
+      fallback: "If you miss live, submit a recorded 90-second update."
+    },
+    5: {
+      title: "Making Decisions Clearly",
+      sections: [{ header: "The Decision Matrix", body: "Big choices get easier when you score your options. You will use simple points (1–5) to compare ideas and choose your best next step." }],
+      task: "Create a 3-choice scorecard and explain why your top choice wins.",
+      timeEstimate: "25-35 minutes",
+      checklist: ["List 3 possible choices", "Score each choice 1-5 for impact/effort", "Explain why your winner is best"],
+      example: "Choice A scored highest because it helps more people and can be done this week.",
+      parentSupport: ["Ask child to explain scores out loud", "Check if choice is realistic for their age", "Help break first step into 10 minutes"],
+      fallback: "If AI support is down, use the printable scorecard format in your notes."
+    },
+    6: {
+      title: "Explaining Your Idea Clearly",
+      sections: [{ header: "The Executive Brief", body: "If you can explain it simply, you understand it. This week, you will turn your idea into one clear slide with a title, plan, and impact." }],
+      task: "Build a one-slide brief: Problem, Idea, Plan, and Why it matters.",
+      timeEstimate: "30-40 minutes",
+      checklist: ["Use one clear title", "Include Problem + Idea + Plan + Impact", "Keep text short and easy to read"],
+      example: "Problem: litter near playground. Idea: student cleanup teams. Plan: 10-minute Friday cleanup. Impact: cleaner, safer play area.",
+      parentSupport: ["Review slide for readability", "Ask child to explain each section aloud", "Encourage one visual (icon/photo)"],
+      fallback: "If slide tools are unavailable, write the four sections in a notebook and upload a photo."
+    },
+    7: {
+      title: "Pitch Practice (Live)",
+      sections: [{ header: "The Calm Pause", body: "Confident speakers slow down and breathe. You will practice your 60–90 second pitch and answer two follow-up questions with calm focus." }],
+      task: "Practice with the AI mentor and submit your best 60–90 second pitch.",
+      timeEstimate: "20-30 minutes",
+      checklist: ["Pitch is 60-90 seconds", "Speak clearly with pauses", "Answer 2 follow-up questions"],
+      example: "My project solves hallway traffic jams by adding directional floor arrows. We tested it for one week and saw smoother movement.",
+      parentSupport: ["Do 2 short rehearsals with timer", "Use calm breathing before recording", "Give one specific compliment"],
+      fallback: "If live mentor is unavailable, use 3 practice questions: What problem? Why this idea? What is your next step?"
+    },
+    8: {
+      title: "Final Reflection & Polish",
+      sections: [{ header: "Portfolio Synthesis", body: "You have built real skills. Now you will show your growth with your best work samples and a short reflection on what you learned." }],
+      task: "Submit your final mini-portfolio (best 3 artifacts + 1 reflection paragraph).",
+      timeEstimate: "30-45 minutes",
+      checklist: ["Pick your best 3 artifacts", "Write one reflection paragraph", "Name one skill you improved most"],
+      example: "I improved at making clear decisions. My best artifact was the choice scorecard because it helped me choose confidently.",
+      parentSupport: ["Review all 8 weeks and celebrate growth", "Ask child to choose their proudest work", "Help child share final reflection"],
+      fallback: "If uploads fail, submit artifact titles + reflection text and retry media later."
+    }
   };
 
   const closeOverlay = () => {
@@ -124,8 +232,25 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
     setAuditSources([]);
   };
 
-  const openModule = (week: number) => setSearchParams({ module: week.toString() });
+  const openModule = (week: number) => {
+    const prior = application?.submissions.find(s => s.week === week);
+    setSubmissionText(prior?.content || '');
+    setSearchParams({ module: week.toString() });
+  };
   const openLab = (type: 'asset' | 'pitch') => setSearchParams({ lab: type });
+
+  const speakFallback = (text: string) => {
+    if (!('speechSynthesis' in window)) {
+      setIsSpeaking(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    utterance.onend = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
 
   // --- Camera/Mic Logic (Triggered ONLY on click) ---
   const startRecording = async () => {
@@ -158,6 +283,10 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
   };
 
   const startLiveCoach = async () => {
+    if (!aiAvailable) {
+      alert("Live AI Mentor is unavailable right now. Use the fallback prompt cards in this module and submit a recorded practice pitch.");
+      return;
+    }
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const inCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
@@ -208,7 +337,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
       });
       liveSessionRef.current = await sessionPromise;
     } catch (err) {
-      alert("Microphone permission is required for the Live AI Mentor.");
+      alert("Live AI is unavailable right now. Use fallback questions: What problem are you solving? Why this idea? What is your next step?");
     }
   };
 
@@ -222,6 +351,10 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
     if (showModule === null || isSpeaking) return;
     setIsSpeaking(true);
     const textToSpeak = curriculumMap[showModule].sections.map((s: any) => s.body).join(' ');
+    if (!aiAvailable) {
+      speakFallback(textToSpeak);
+      return;
+    }
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
@@ -242,16 +375,20 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
         source.onended = () => setIsSpeaking(false);
         source.start();
       }
-    } catch (err) { setIsSpeaking(false); }
+    } catch (err) {
+      speakFallback(textToSpeak);
+    }
   };
 
   const handleFinalSubmit = () => {
     if (showModule === null) return;
+    const existing = application?.submissions.find(s => s.week === showModule);
     onPostSubmission(application?.parentEmail || '', {
       week: showModule,
       title: curriculumMap[showModule].title,
       content: submissionText,
       status: 'Submitted',
+      revisedAt: existing?.status === 'Needs Revision' ? new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : existing?.revisedAt,
       submittedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     });
     closeOverlay();
@@ -262,6 +399,18 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
 
   return (
     <div className="min-h-screen bg-bgSoft pb-24 fade-in">
+      {showCelebration && (
+        <div className="fixed top-24 right-8 z-[170] bg-green-600 text-white px-6 py-4 shadow-2xl rounded-sm text-[10px] uppercase tracking-[0.3em] font-bold">
+          Milestone Approved 🎉 Keep going!
+        </div>
+      )}
+      {!aiAvailable && (
+        <div className="mx-auto max-w-7xl mt-6 px-12">
+          <div className="bg-amber-50 border border-amber-200 text-amber-900 px-6 py-4 text-sm rounded-sm">
+            AI tools are currently offline. You can still complete every task using the built-in examples and fallback activities.
+          </div>
+        </div>
+      )}
       {/* Overlays are gated by URL search params. Backspacing (browser back) removes them naturally. */}
       {showImageLab && (
         <div className="fixed inset-0 z-[160] bg-primary/95 backdrop-blur-2xl flex items-center justify-center p-4">
@@ -303,6 +452,11 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
               )}
               {labMode === 'live-coach' && (
                 <div className="w-full max-w-2xl text-center space-y-12">
+                  {!aiAvailable && (
+                    <div className="text-left bg-amber-50 border border-amber-200 text-amber-800 p-4 text-sm rounded-sm">
+                      AI mentor is offline. Fallback: answer 3 prompts — What problem am I solving? Why this idea? What is my next step?
+                    </div>
+                  )}
                   <div className="w-48 h-48 bg-accent/5 border border-accent/20 rounded-full mx-auto flex items-center justify-center relative">
                     <div className={`absolute inset-0 border-2 border-accent rounded-full ${isLiveConnected ? 'animate-ping' : 'opacity-0'}`}></div>
                     <svg className={`w-12 h-12 text-accent ${isLiveConnected ? 'scale-110' : 'opacity-50'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
@@ -325,27 +479,67 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
             <div className="flex-1 p-12 overflow-y-auto no-scrollbar">
                <div className="flex justify-between items-center mb-12">
                  <button onClick={closeOverlay} className="text-[10px] font-bold uppercase tracking-widest opacity-30 hover:opacity-100">Portal Home</button>
-                 <button onClick={narrateBriefing} disabled={isSpeaking} className="text-[10px] font-bold uppercase tracking-widest text-accent flex items-center gap-3 border border-accent/20 px-6 py-2 rounded-full">
+                 <div className="flex items-center gap-3">
+                   <button onClick={() => setSimpleMode(!simpleMode)} className="text-[10px] font-bold uppercase tracking-widest border border-primary/20 px-4 py-2 rounded-full">
+                     {simpleMode ? 'Standard View' : 'Simple View'}
+                   </button>
+                   <button onClick={narrateBriefing} disabled={isSpeaking} className="text-[10px] font-bold uppercase tracking-widest text-accent flex items-center gap-3 border border-accent/20 px-6 py-2 rounded-full">
                    {isSpeaking ? 'AI Narrating...' : 'Listen to Briefing'}
-                 </button>
+                   </button>
+                 </div>
                </div>
-               <h2 className="text-5xl font-serif text-primary mb-12">{curriculumMap[showModule].title}</h2>
+               <h2 className={`${simpleMode ? 'text-4xl' : 'text-5xl'} font-serif text-primary mb-6`}>{curriculumMap[showModule].title}</h2>
+               <p className="text-[11px] uppercase tracking-widest font-bold text-accent mb-10">Time Estimate: {curriculumMap[showModule].timeEstimate}</p>
                <div className="space-y-16 mb-24">
                  {curriculumMap[showModule].sections.map((s: any, i: number) => (
                    <div key={i} className="group">
-                     <p className="text-2xl font-serif leading-relaxed text-primary/80 italic">"{s.body}"</p>
+                     <p className={`${simpleMode ? 'text-xl' : 'text-2xl'} font-serif leading-relaxed text-primary/80 italic`}>"{s.body}"</p>
                    </div>
                  ))}
                </div>
+               <div className="bg-bgSoft border border-primary/10 p-8 rounded-sm mb-8">
+                 <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] mb-4 text-primary/60">Success Checklist</h4>
+                 <div className="space-y-3">
+                   {curriculumMap[showModule].checklist.map((item: string, idx: number) => {
+                     const cKey = `${application.id}-${showModule}-${idx}`;
+                     return (
+                       <label key={cKey} className="flex items-start gap-3 text-sm text-primary/80">
+                         <input
+                           type="checkbox"
+                           checked={!!checklistState[cKey]}
+                           onChange={e => setChecklistState(prev => ({ ...prev, [cKey]: e.target.checked }))}
+                           className="mt-1"
+                         />
+                         <span>{item}</span>
+                       </label>
+                     );
+                   })}
+                 </div>
+               </div>
+               <div className="bg-white border border-accent/20 p-8 rounded-sm mb-8">
+                 <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] mb-4 text-accent">Example Response</h4>
+                 <p className="text-sm leading-relaxed text-primary/80">{curriculumMap[showModule].example}</p>
+               </div>
+               {application.submissions.find(s => s.week === showModule)?.status === 'Needs Revision' && (
+                 <div className="bg-amber-50 border border-amber-200 p-8 rounded-sm mb-8">
+                   <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] mb-4 text-amber-700">Revision Requested</h4>
+                   <p className="text-sm mb-3 text-amber-900">{application.submissions.find(s => s.week === showModule)?.feedback}</p>
+                   <p className="text-sm font-semibold text-amber-900">Next Step: {application.submissions.find(s => s.week === showModule)?.revisionPrompt || 'Use checklist + example and revise clearly.'}</p>
+                 </div>
+               )}
                <div className="bg-primary text-white p-12 rounded-sm shadow-xl">
                  <h4 className="text-accent text-[10px] font-bold uppercase tracking-[0.4em] mb-6">Task</h4>
-                 <p className="text-3xl font-serif mb-6 leading-tight">"{curriculumMap[showModule].task}"</p>
+                 <p className="text-2xl font-serif mb-6 leading-tight">"{curriculumMap[showModule].task}"</p>
+                 <p className="text-xs opacity-80">Fallback Activity: {curriculumMap[showModule].fallback}</p>
                </div>
             </div>
             <div className="w-full md:w-[450px] bg-bgSoft p-12 flex flex-col gap-10 border-l border-primary/5">
-              <h3 className="text-2xl font-serif">Executive Briefing</h3>
-              <textarea value={submissionText} onChange={e => setSubmissionText(e.target.value)} className="flex-grow bg-white border p-8 rounded-sm text-sm outline-none font-sans shadow-sm" placeholder="Synthesize your analysis here..." />
-              <button onClick={handleFinalSubmit} className="w-full bg-primary text-white py-8 text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-accent shadow-2xl transition-all">Publish Milestone</button>
+              <h3 className="text-2xl font-serif">My Submission</h3>
+              <p className="text-xs uppercase tracking-widest font-bold opacity-50">Tip: use 4 short parts — Problem, Idea, Plan, Impact.</p>
+              <textarea value={submissionText} onChange={e => setSubmissionText(e.target.value)} className="flex-grow bg-white border p-8 rounded-sm text-base outline-none font-sans shadow-sm" placeholder="Write your response in short clear sentences..." />
+              <button onClick={handleFinalSubmit} className="w-full bg-primary text-white py-8 text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-accent shadow-2xl transition-all">
+                {application.submissions.find(s => s.week === showModule)?.status === 'Needs Revision' ? 'Resubmit Milestone' : 'Publish Milestone'}
+              </button>
             </div>
           </div>
         </div>
@@ -356,11 +550,22 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
           <div className="space-y-4">
             <span className="text-accent text-[11px] font-bold uppercase tracking-[0.6em] block">BrightPath Lab HQ</span>
             <h1 className="text-7xl font-serif text-primary">Hello, {application.studentName}</h1>
+            <button onClick={() => setSimpleMode(!simpleMode)} className="text-[10px] font-bold uppercase tracking-widest border border-primary/20 px-4 py-2 rounded-full bg-white">
+              {simpleMode ? 'Standard View' : 'Simple View'}
+            </button>
           </div>
           <div className="flex gap-4">
              <div className="bg-white p-8 border border-primary/5 rounded-sm shadow-sm text-center min-w-[150px]">
                <p className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-2">Days Remaining</p>
                <p className="text-4xl font-serif">{daysLeft}D</p>
+             </div>
+             <div className="bg-white p-8 border border-primary/5 rounded-sm shadow-sm text-center min-w-[150px]">
+               <p className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-2">Reviewed</p>
+               <p className="text-4xl font-serif text-green-700">{reviewedCount}</p>
+             </div>
+             <div className="bg-white p-8 border border-primary/5 rounded-sm shadow-sm text-center min-w-[150px]">
+               <p className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-2">Streak</p>
+               <p className="text-4xl font-serif text-accent">{streak}</p>
              </div>
              <button onClick={() => openLab('asset')} className="bg-accent text-white p-8 rounded-sm shadow-xl flex flex-col items-center justify-center min-w-[150px] hover:scale-105 transition-all">
                <p className="text-[9px] font-bold uppercase tracking-widest mb-2 font-bold">Asset Lab</p>
@@ -374,7 +579,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
             <div className="bg-white p-16 border border-primary/5 shadow-sm relative group hover:shadow-2xl transition-all duration-700 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-accent group-hover:w-3 transition-all"></div>
               <h3 className="text-4xl font-serif mb-6 text-primary">Active Milestone: 0{currentWeek}</h3>
-              <p className="opacity-60 text-xl font-serif italic mb-10 leading-relaxed max-w-xl">"{curriculumMap[currentWeek]?.title}" — Analyzing systemic patterns.</p>
+              <p className="opacity-60 text-xl font-serif italic mb-10 leading-relaxed max-w-xl">"{curriculumMap[currentWeek]?.title}" — One clear step at a time.</p>
               <button onClick={() => openModule(currentWeek)} className="bg-primary text-white px-12 py-5 text-[10px] font-bold uppercase tracking-widest hover:bg-accent shadow-xl transition-all">Enter Lab Environment</button>
             </div>
 
@@ -383,12 +588,13 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
                 const sub = application.submissions.find(s => s.week === page.week);
                 const isComplete = sub?.status === 'Reviewed';
                 const isPending = sub?.status === 'Submitted';
-                const isActive = (page.week === currentWeek && !sub) || isInspector;
+                const needsRevision = sub?.status === 'Needs Revision';
+                const isActive = (page.week === currentWeek && !sub) || needsRevision || isInspector;
 
                 return (
                   <div key={page.week} onClick={() => { if (isActive) openModule(page.week); }}
                     className={`p-8 border flex flex-col justify-between rounded-sm transition-all duration-700 aspect-[3/4.8] relative group cursor-pointer
-                      ${isComplete ? 'bg-white border-accent shadow-sm' : isPending ? 'bg-white opacity-70' : isActive ? 'bg-white border-dashed border-accent/50 hover:border-accent' : 'bg-bgSoft opacity-30 grayscale'}`}
+                      ${isComplete ? 'bg-white border-accent shadow-sm' : needsRevision ? 'bg-amber-50 border-amber-300' : isPending ? 'bg-white opacity-70' : isActive ? 'bg-white border-dashed border-accent/50 hover:border-accent' : 'bg-bgSoft opacity-30 grayscale'}`}
                   >
                     <div>
                       <p className="text-[10px] font-bold opacity-30 tracking-widest mb-8">W.0{page.week}</p>
@@ -396,7 +602,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
                       <p className="text-[10px] opacity-40 leading-relaxed uppercase tracking-widest font-bold">{page.description}</p>
                     </div>
                     <div className="text-[10px] font-bold tracking-widest uppercase pt-6 border-t border-primary/5 group-hover:tracking-[0.2em] transition-all">
-                      {isComplete ? 'Published' : isPending ? 'Analyzing' : isActive ? 'Active' : 'Locked'}
+                      {isComplete ? 'Published' : needsRevision ? 'Revise' : isPending ? 'Analyzing' : isActive ? 'Active' : 'Locked'}
                     </div>
                   </div>
                 );
@@ -406,11 +612,48 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ application, onPostSubmis
 
           <div className="space-y-16">
             <div className="bg-white p-12 border border-primary/5 shadow-sm">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest opacity-30 mb-6">Badges & Wins</h4>
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className={`p-4 border ${reviewedCount >= 1 ? 'bg-green-50 border-green-200' : 'opacity-40'}`}>
+                  <p className="text-xs font-bold">Starter</p>
+                  <p className="text-[10px] opacity-60">First review earned</p>
+                </div>
+                <div className={`p-4 border ${streak >= 3 ? 'bg-accent/10 border-accent/40' : 'opacity-40'}`}>
+                  <p className="text-xs font-bold">Consistency</p>
+                  <p className="text-[10px] opacity-60">3-week streak</p>
+                </div>
+                <div className={`p-4 border ${reviewedCount >= 5 ? 'bg-primary/10 border-primary/30' : 'opacity-40'}`}>
+                  <p className="text-xs font-bold">Momentum</p>
+                  <p className="text-[10px] opacity-60">5 reviews</p>
+                </div>
+                <div className={`p-4 border ${reviewedCount >= 8 ? 'bg-yellow-50 border-yellow-300' : 'opacity-40'}`}>
+                  <p className="text-xs font-bold">Showcase Ready</p>
+                  <p className="text-[10px] opacity-60">All milestones done</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-12 border border-primary/5 shadow-sm">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest opacity-30 mb-4">Parent Snapshot</h4>
+              <p className="text-sm mb-3"><strong>Progress:</strong> {reviewedCount}/8 reviewed, {inRevisionCount} need revision.</p>
+              <p className="text-sm mb-4"><strong>This Week:</strong> {curriculumMap[currentWeek]?.title}</p>
+              <h5 className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-2">At-home support</h5>
+              <ul className="list-disc pl-5 space-y-2 text-sm text-primary/80">
+                {curriculumMap[currentWeek]?.parentSupport?.map((tip: string, idx: number) => (
+                  <li key={idx}>{tip}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-white p-12 border border-primary/5 shadow-sm">
                <h4 className="text-[10px] font-bold uppercase tracking-widest opacity-30 mb-10">Facilitator Stream</h4>
                <div className="space-y-12">
                  {application.submissions.filter(s => s.feedback).map(s => (
                    <div key={s.week} className="border-l-2 border-accent/20 pl-8 group">
                      <p className="text-lg font-serif italic mb-4 opacity-70 leading-relaxed">"{s.feedback}"</p>
+                     {s.status === 'Needs Revision' && (
+                       <p className="text-[10px] uppercase tracking-widest font-bold text-amber-700 mb-2">Revision Prompt: {s.revisionPrompt || 'Revise with checklist and resubmit.'}</p>
+                     )}
                      <p className="text-[9px] font-bold opacity-30 tracking-widest uppercase">W.0{s.week} Portfolio Review</p>
                    </div>
                  ))}

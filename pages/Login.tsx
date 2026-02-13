@@ -9,6 +9,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [activeTab, setActiveTab] = useState<'student' | 'staff'>('student');
+  const [studentEmail, setStudentEmail] = useState('parent@test.com');
   const [show2FA, setShow2FA] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const handleStudentLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin('student', 'parent@test.com');
+    onLogin('student', studentEmail);
     navigate(Page.StudentPortal);
   };
 
@@ -123,7 +124,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <form onSubmit={handleStudentLogin} className="space-y-6">
             <div>
               <label className="block text-[10px] uppercase tracking-widest opacity-40 mb-2 font-bold">Parent Email</label>
-              <input type="email" required className="w-full bg-bgSoft border-b border-primary/10 p-4 focus:border-accent outline-none" defaultValue="parent@test.com" />
+              <input
+                type="email"
+                required
+                className="w-full bg-bgSoft border-b border-primary/10 p-4 focus:border-accent outline-none"
+                value={studentEmail}
+                onChange={(e) => setStudentEmail(e.target.value)}
+              />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-widest opacity-40 mb-2 font-bold">PIN</label>
