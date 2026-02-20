@@ -5,15 +5,11 @@ import { Page } from '../types';
 import FAQSection from '../components/FAQSection';
 
 const Program: React.FC = () => {
-  const curriculum = [
-    { week: 1, title: 'Who Are You Becoming?', desc: 'Strengths + Goal Mapping. Students identify 3 strengths and build one age-appropriate growth goal.', live: false },
-    { week: 2, title: 'How Value Works', desc: 'Money Choices Lab. Students practice needs vs wants using simple budget scenarios they can relate to.', live: false },
-    { week: 3, title: 'Spotting Real Opportunities', desc: 'Fix-It Thinking. Students spot everyday problems at school/home and choose one realistic solution.', live: false },
-    { week: 4, title: 'Live Strategy Workshop', desc: 'Live Cohort Session. Students share a short progress update and practice giving respectful peer feedback.', live: true },
-    { week: 5, title: 'Making Decisions Clearly', desc: 'Choice Scorecards. Students compare 2-3 options with simple scoring to justify a decision.', live: false },
-    { week: 6, title: 'Explaining Your Idea Clearly', desc: 'One-Slide Brief. Students organize their idea into a clear, kid-friendly structure.', live: false },
-    { week: 7, title: 'Pitch Practice (Live)', desc: 'Live Session. Students rehearse a 60-90 second pitch and respond to guided Q&A with confidence.', live: true },
-    { week: 8, title: 'Final Reflection & Polish', desc: 'Showcase Portfolio. Students submit their best work samples and reflect on personal growth.', live: false },
+  const curriculumPhases = [
+    { range: 'Weeks 1–2', title: 'Identity + Value Foundations', desc: 'Students map strengths, define one strategic growth target, and practice core money/value trade-offs using relatable scenarios.', live: false },
+    { range: 'Weeks 3–4', title: 'Opportunity + Live Strategy', desc: 'Students identify realistic opportunities, test solution logic, and participate in a required live workshop with guided peer feedback.', live: true },
+    { range: 'Weeks 5–6', title: 'Decision + Communication Precision', desc: 'Students use structured scorecards to compare options, then build a one-slide brief to explain decisions with clarity.', live: false },
+    { range: 'Weeks 7–8', title: 'Pitch + Final Showcase', desc: 'Students rehearse a short pitch in live session, respond with confidence, and finalize portfolio artifacts for showcase review.', live: true },
   ];
 
   const deliverySpecs = [
@@ -61,7 +57,7 @@ const Program: React.FC = () => {
                 to={Page.Apply}
                 className="bg-accent text-white px-12 py-5 rounded-sm hover:bg-white hover:text-primary transition-all text-center tracking-[0.2em] uppercase text-[10px] font-bold shadow-xl"
               >
-                Apply for Enrollment
+                Submit Application
               </Link>
             </div>
           </div>
@@ -74,21 +70,26 @@ const Program: React.FC = () => {
           <div className="mb-24">
             <span className="text-accent tracking-[0.4em] uppercase text-[10px] font-bold block mb-4">Milestone Roadmap</span>
             <h2 className="text-5xl font-serif text-primary">The 8-Week Curriculum</h2>
+            <div className="h-px w-24 bg-accent mt-8"></div>
           </div>
-          
-          <div className="grid md:grid-cols-2 gap-x-12 gap-y-20">
-            {curriculum.map((item) => (
-              <div key={item.week} className="relative bg-white p-12 border border-primary/5 hover:border-accent/30 transition-all duration-700 shadow-sm group">
-                {item.live && (
-                  <span className="absolute -top-3 right-6 bg-primary text-white px-4 py-1.5 text-[8px] uppercase tracking-widest font-bold">Required Live Lab</span>
-                )}
-                <span className="text-accent/10 font-serif text-8xl absolute -top-8 -left-4 group-hover:text-accent/20 transition-all">0{item.week}</span>
-                <div className="relative z-10">
-                  <h3 className="text-2xl font-serif mb-6 pt-6 text-primary">{item.title}</h3>
-                  <p className="text-sm opacity-50 leading-relaxed font-medium">{item.desc}</p>
+
+          <div className="relative">
+            <div className="hidden lg:block absolute top-24 left-0 right-0 h-px bg-accent/40"></div>
+            <div className="grid lg:grid-cols-4 gap-10">
+              {curriculumPhases.map((item, idx) => (
+                <div key={item.range} className="relative bg-white p-12 border border-primary/5 hover:border-accent/30 transition-all duration-700 shadow-md hover:shadow-xl hover:-translate-y-1 transform group">
+                  {item.live && (
+                    <span className="absolute -top-3 right-6 bg-primary text-white px-4 py-1.5 text-[8px] uppercase tracking-widest font-bold">Required Live Lab</span>
+                  )}
+                  <span className="text-accent/10 font-serif text-8xl absolute -top-8 -left-4 group-hover:text-accent/20 transition-all">0{idx + 1}</span>
+                  <div className="relative z-10">
+                    <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-accent mb-4">{item.range}</p>
+                    <h3 className="text-2xl font-serif mb-6 pt-2 text-primary">{item.title}</h3>
+                    <p className="text-sm opacity-50 leading-relaxed font-medium">{item.desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>

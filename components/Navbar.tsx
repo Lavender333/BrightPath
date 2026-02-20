@@ -66,10 +66,12 @@ const Navbar: React.FC<NavbarProps> = ({ userType, onLogout }) => {
             </button>
           ) : (
             <div className="flex items-center space-x-6">
-              <Link to={Page.Login} className="hover:text-primary text-[10px] tracking-widest uppercase font-bold border-b border-transparent hover:border-accent">Login</Link>
+              <Link to={Page.Login} className="text-[10px] tracking-widest uppercase font-bold border border-primary/25 rounded-full px-5 py-2.5 hover:bg-primary hover:text-white transition-all duration-300">
+                Login
+              </Link>
               <Link
                 to={Page.Apply}
-                className="bg-accent text-white px-8 py-3 rounded-sm hover:bg-[#B38E3D] transition-all duration-300 shadow-sm"
+                className="bg-accent text-white px-8 py-3 rounded-sm hover:bg-primary transition-all duration-300 shadow-sm"
               >
                 Apply
               </Link>

@@ -1,19 +1,20 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import Program from './pages/Program';
-import Apply from './pages/Apply';
-import About from './pages/About';
-import Board from './pages/Board';
-import Impact from './pages/Impact';
-import Sponsor from './pages/Sponsor';
-import Login from './pages/Login';
-import StaffDashboard from './pages/StaffDashboard';
-import StudentPortal from './pages/StudentPortal';
 import { Page, Application, Submission, ImpactStage, ImpactSnapshot } from './types';
+
+const Home = lazy(() => import('./pages/Home'));
+const Program = lazy(() => import('./pages/Program'));
+const Apply = lazy(() => import('./pages/Apply'));
+const About = lazy(() => import('./pages/About'));
+const Board = lazy(() => import('./pages/Board'));
+const Impact = lazy(() => import('./pages/Impact'));
+const Sponsor = lazy(() => import('./pages/Sponsor'));
+const Login = lazy(() => import('./pages/Login'));
+const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
+const StudentPortal = lazy(() => import('./pages/StudentPortal'));
 
 const APPS_STORAGE_KEY = 'brightpath_apps_v1';
 const SESSION_STORAGE_KEY = 'brightpath_session_v1';
@@ -70,6 +71,12 @@ const ScrollToTop = () => {
   }, [pathname]);
   return null;
 };
+
+const RouteFallback: React.FC = () => (
+  <div className="min-h-[40vh] flex items-center justify-center px-6">
+    <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-primary/40">Loading...</p>
+  </div>
+);
 
 const App: React.FC = () => {
   const [userType, setUserType] = useState<'staff' | 'student' | null>(() => {
@@ -185,31 +192,33 @@ const App: React.FC = () => {
         <ScrollToTop />
         <Navbar userType={userType} onLogout={() => { setUserType(null); setActiveEmail(null); }} />
         <main className="flex-grow pt-20">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/program" element={<Program />} />
-            <Route path="/apply" element={<Apply onApply={addApplication} />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/board" element={<Board />} />
-            <Route path="/impact" element={<Impact />} />
-            <Route path="/sponsor" element={<Sponsor />} />
-            <Route path="/login" element={<Login onLogin={(type, email) => { setUserType(type); setActiveEmail(email || 'parent@test.com'); }} />} />
-            
-            <Route path="/staff" element={
-              <StaffDashboard 
-                applications={apps} 
-                onStatusChange={updateAppStatus} 
-                onGiveFeedback={handleFeedback}
-                onSaveImpact={handleImpactUpdate}
-              />
-            } />
-            <Route path="/portal" element={
-              <StudentPortal 
-                application={apps.find(a => a.parentEmail === (activeEmail || 'parent@test.com'))} 
-                onPostSubmission={handleSubmission}
-              />
-            } />
-          </Routes>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/program" element={<Program />} />
+              <Route path="/apply" element={<Apply onApply={addApplication} />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/board" element={<Board />} />
+              <Route path="/impact" element={<Impact />} />
+              <Route path="/sponsor" element={<Sponsor />} />
+              <Route path="/login" element={<Login onLogin={(type, email) => { setUserType(type); setActiveEmail(email || 'parent@test.com'); }} />} />
+              
+              <Route path="/staff" element={
+                <StaffDashboard 
+                  applications={apps} 
+                  onStatusChange={updateAppStatus} 
+                  onGiveFeedback={handleFeedback}
+                  onSaveImpact={handleImpactUpdate}
+                />
+              } />
+              <Route path="/portal" element={
+                <StudentPortal 
+                  application={apps.find(a => a.parentEmail === (activeEmail || 'parent@test.com'))} 
+                  onPostSubmission={handleSubmission}
+                />
+              } />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>
