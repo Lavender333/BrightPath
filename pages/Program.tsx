@@ -93,6 +93,29 @@ const Program: React.FC = () => {
         </div>
       </section>
 
+      {/* Private Briefing Details */}
+      <section className="py-40 px-6 lg:px-12 bg-white border-y border-primary/5" id="private-briefing-details">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-16 text-center">
+            <span className="text-accent tracking-[0.4em] uppercase text-[10px] font-bold block mb-4">Private Briefing Details</span>
+            <h2 className="text-5xl font-serif text-primary">Program Structure & Expectations</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {[
+              { label: 'Selection', value: 'Application review plus parent/candidate fit conversation.' },
+              { label: 'Weekly Expectations', value: 'Live session attendance, guided assignments, and mentor feedback loops.' },
+              { label: 'Deliverables', value: 'Decision frameworks, financial reasoning drills, and executive brief presentations.' },
+              { label: 'Family Communication', value: 'Progress visibility and milestone updates throughout the cohort.' }
+            ].map((item) => (
+              <div key={item.label} className="p-8 bg-bgSoft border border-primary/5 shadow-sm">
+                <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40 mb-4">{item.label}</p>
+                <p className="text-base font-serif text-primary leading-relaxed">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Logistics & Delivery Grid */}
       <section className="py-40 px-6 lg:px-12 bg-white border-y border-primary/5">
         <div className="max-w-7xl mx-auto">
