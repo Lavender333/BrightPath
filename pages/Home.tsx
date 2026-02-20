@@ -24,7 +24,7 @@ const Home: React.FC = () => {
                 Request Candidate Evaluation
               </Link>
               <a
-                href="#program-structure"
+                href="#private-briefing-details"
                 className="w-full sm:w-auto border border-primary/20 px-10 py-5 rounded-sm hover:bg-primary/5 transition-all duration-300 text-center text-[10px] uppercase tracking-[0.2em] font-bold"
               >
                 Private Briefing Details
@@ -176,7 +176,7 @@ const Home: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className="mt-12 p-10 bg-white border border-primary/5 shadow-sm">
+          <div className="mt-12 p-10 bg-white border border-primary/5 shadow-sm" id="private-briefing-details">
             <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40 mb-6 text-center">Private Briefing Details</p>
             <div className="grid md:grid-cols-2 gap-8">
               {[
