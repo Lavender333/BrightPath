@@ -5,9 +5,9 @@ import { Page } from '../types';
 
 const Home: React.FC = () => {
   const heroImages = [
-    '/hero-1.jpg',
-    'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=1000',
-    'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1000',
+    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=1000',
+    'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1000',
+    'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=1000',
   ];
   const [activeHeroImage, setActiveHeroImage] = useState(0);
 
@@ -54,7 +54,7 @@ const Home: React.FC = () => {
                 <img
                   key={image}
                   src={image}
-                  alt="BrightPath Student Leadership"
+                  alt="Happy student learning"
                   className={`absolute inset-0 object-cover w-full h-full grayscale mix-blend-multiply hover:grayscale-0 transition-all duration-1000 ${activeHeroImage === index ? 'opacity-80' : 'opacity-0'}`}
                 />
               ))}
