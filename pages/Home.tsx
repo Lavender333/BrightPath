@@ -30,7 +30,7 @@ const Home: React.FC = () => {
               The bridge to <span className="italic">strategic</span> ownership.
             </h1>
             <p className="text-lg lg:text-xl opacity-80 mb-12 max-w-lg leading-relaxed font-serif">
-              BrightPath Youth, Inc. is an Ohio nonprofit delivering a selective 8-week leadership and financial intelligence cohort for students ages 8–14.
+              BrightPath Youth, Inc. is an Ohio nonprofit delivering an inclusive 8-week leadership and financial intelligence cohort for students ages 8–14.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 items-center">
               <Link
@@ -82,10 +82,10 @@ const Home: React.FC = () => {
           </h2>
           <div className="space-y-10">
             <p className="text-3xl lg:text-5xl font-serif leading-tight text-primary">
-              BrightPath is a selective youth leadership and financial intelligence laboratory.
+              BrightPath is a youth leadership and financial intelligence laboratory built for belonging, confidence, and structured growth.
             </p>
             <p className="text-xl opacity-60 max-w-2xl mx-auto leading-relaxed font-serif italic text-justify">
-              We combine executive communication, structured decision-making, and practical money frameworks into one guided 8-week cohort experience designed for long-term capability.
+              We combine executive communication, structured decision-making, and practical money frameworks into one guided 8-week cohort experience designed for long-term capability, respectful belonging, and access across different learning journeys.
             </p>
             <div className="h-px w-24 bg-accent mx-auto mt-12"></div>
           </div>
@@ -105,7 +105,7 @@ const Home: React.FC = () => {
               { title: 'Ages 8–14', desc: 'Young learners ready for guided leadership and financial intelligence development.' },
               { title: 'Curious Thinkers', desc: 'Students who ask stronger questions and want to understand how systems work.' },
               { title: 'Emerging Leaders', desc: 'Learners who are practicing confidence, clarity, and ownership in communication.' },
-              { title: 'Committed Families', desc: 'Parents seeking a selective cohort with clear standards and measurable outcomes.' }
+              { title: 'Committed Families', desc: 'Families seeking a focused cohort with clear standards, measurable outcomes, and a respectful learning culture.' }
             ].map((item, index) => (
               <div key={item.title} className="p-12 bg-white border border-primary/5 hover:border-accent/20 transition-all duration-500 shadow-md hover:shadow-xl hover:-translate-y-1 transform group">
                 <div className="w-8 h-8 border border-accent/30 mb-8 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all text-accent">
@@ -215,7 +215,7 @@ const Home: React.FC = () => {
               { label: 'Duration', value: '8 weeks' },
               { label: 'Age Range', value: 'Ages 8–14' },
               { label: 'Weekly Time', value: 'Approx. 45–60 minutes per week' },
-              { label: 'Cohort Size', value: 'Maximum 6 students — No exceptions' },
+              { label: 'Cohort Size', value: 'Small-group cohort with up to 6 students for focused support' },
               { label: 'Tuition', value: '$425 founding cohort rate (regularly $595)' },
             ].map((item, idx) => (
               <div key={idx} className="flex justify-between py-6 border-b border-primary/5 gap-8">
@@ -231,7 +231,7 @@ const Home: React.FC = () => {
       <section className="bg-primary text-bgSoft py-14 px-6 lg:px-12 border-y border-bgSoft/10">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-[10px] uppercase tracking-[0.35em] font-bold text-accent mb-5">Founding Cohort Capacity</p>
-          <h2 className="text-3xl lg:text-5xl font-serif leading-tight">Cohort size limited to 6 students.</h2>
+          <h2 className="text-3xl lg:text-5xl font-serif leading-tight">Small-group cohort with focused support.</h2>
         </div>
       </section>
 
@@ -241,7 +241,7 @@ const Home: React.FC = () => {
           <h2 className="text-5xl lg:text-7xl font-serif mb-10 leading-[1.1] text-primary">
             Accepting <span className="italic">Applications</span> Now.
           </h2>
-          <p className="text-lg opacity-50 mb-16 font-serif">The founding cohort is limited to 6 students to ensure absolute facilitator focus.</p>
+          <p className="text-lg opacity-50 mb-16 font-serif">The founding cohort is intentionally small so each student receives thoughtful facilitator support.</p>
           <Link
             to={Page.Apply}
             className="inline-block bg-primary text-white px-20 py-6 rounded-sm hover:bg-accent transition-all duration-500 font-bold tracking-[0.3em] uppercase text-[10px] shadow-2xl"

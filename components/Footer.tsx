@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
         <div>
           <h2 className="text-xl font-serif font-bold tracking-widest mb-6">BRIGHTPATH</h2>
           <p className="text-sm opacity-60 leading-relaxed max-w-xs">
-            BrightPath Youth, Inc. is an Ohio nonprofit organization dedicated to structured leadership and financial intelligence.
+            BrightPath Youth, Inc. is an Ohio nonprofit organization dedicated to structured leadership, financial intelligence, and inclusive youth development.
           </p>
         </div>
         

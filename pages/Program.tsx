@@ -18,7 +18,7 @@ const Program: React.FC = () => {
     { label: 'Live Sessions', value: 'Weeks 4, 7, and final Showcase Event' },
     { label: 'Session Length', value: '60 min (Weeks 4 & 7) / 90 min (Showcase)' },
     { label: 'Platform', value: 'Modules via BrightPath Lab. Live via Zoom.' },
-    { label: 'Cohort Size', value: 'Maximum 6 students — No exceptions' },
+    { label: 'Cohort Size', value: 'Small-group cohort with up to 6 students for focused support' },
     { label: 'Program Dates', value: 'Spring 2025 Cohort (See Enrollment Form)' },
     { label: 'Time Zone', value: 'Eastern Time — Recorded for async fallback (Weeks 4 & 7 only)' },
   ];
@@ -48,9 +48,9 @@ const Program: React.FC = () => {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="max-w-3xl">
             <span className="text-accent tracking-[0.5em] uppercase text-[10px] mb-6 block font-bold">Laboratory Framework</span>
-            <h1 className="text-6xl lg:text-8xl font-serif mb-10 leading-tight">Elite <br /><span className="italic text-accent/80">Foundations.</span></h1>
+            <h1 className="text-6xl lg:text-8xl font-serif mb-10 leading-tight">Strong <br /><span className="italic text-accent/80">Foundations.</span></h1>
             <p className="text-xl opacity-80 leading-relaxed mb-12 font-serif italic max-w-2xl">
-              "We provide the diagnostic environment where young leaders rise to the standard of calm, executive authority."
+              "We provide a supportive environment where young leaders build calm confidence, clear thinking, and executive authority."
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
               <Link

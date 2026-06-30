@@ -10,7 +10,7 @@ const About: React.FC = () => {
           <div className="space-y-8">
             <h2 className="text-accent tracking-widest uppercase text-xs font-bold">Our Mission</h2>
             <p className="text-3xl font-serif leading-tight">
-              BrightPath equips youth with structured thinking frameworks, financial awareness, and communication confidence through focused cohort-based programming.
+              BrightPath equips youth from diverse backgrounds with structured thinking frameworks, financial awareness, and communication confidence through focused cohort-based programming.
             </p>
           </div>
         </div>
@@ -28,7 +28,7 @@ const About: React.FC = () => {
               { title: 'Models Over Memorization', desc: 'Learning to think in mental models for strategy.' },
               { title: 'Early Systems Awareness', desc: 'Understanding financial systems before adulthood.' },
               { title: 'Executive Presence', desc: 'Presenting ideas with quiet confidence and clarity.' },
-              { title: 'Ownership Mindset', desc: 'Developing a sense of responsibility for personal growth.' }
+              { title: 'Inclusive Ownership', desc: 'Developing personal growth standards in a respectful environment where every learner is seen.' }
             ].map((item, i) => (
               <div key={i} className="flex gap-4">
                 <div className="w-1.5 bg-accent h-1.5 mt-2 flex-shrink-0"></div>
@@ -52,13 +52,13 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
           <div className="order-2 md:order-1">
              <span className="text-accent tracking-[0.4em] uppercase text-xs mb-4 block font-bold">The Founder</span>
-             <h2 className="text-5xl font-serif mb-2 text-white">Antoinette Williams</h2>
+             <h2 className="text-5xl font-serif mb-2 text-white">Antoinette McKinney</h2>
              <p className="text-accent tracking-[0.2em] uppercase text-[10px] font-bold mb-8">Executive Facilitator & Founder</p>
              <p className="text-lg opacity-70 leading-relaxed mb-6 font-serif italic">
-               Antoinette Williams founded BrightPath on the conviction that strategic clarity and financial intelligence are not natural traits, but disciplines that can be mastered by the young.
+               Antoinette McKinney founded BrightPath on the conviction that strategic clarity and financial intelligence are not natural traits, but disciplines that can be mastered by the young.
              </p>
              <p className="text-lg opacity-70 leading-relaxed mb-6">
-               With a background in high-stakes strategy and diagnostic systems, Antoinette has spent her career bridging the gap between potential and performance. She created BrightPath to provide a rigorous, supportive environment where youth can rise to the standard of executive authority.
+               With a background in high-stakes strategy and diagnostic systems, Antoinette has spent her career bridging the gap between potential and performance. She created BrightPath to provide a rigorous, supportive environment where youth from every starting point can rise to the standard of executive authority.
              </p>
              <p className="text-lg opacity-70 leading-relaxed">
                Under her leadership, BrightPath remains committed to pedagogical excellence, nonprofit transparency, and the mission of equipping the next generation with the tools of ownership.
@@ -68,7 +68,7 @@ const About: React.FC = () => {
             <div className="relative aspect-[4/5] bg-bgSoft/10 rounded-sm overflow-hidden shadow-2xl group">
                <img 
                  src="https://images.unsplash.com/photo-1567532939604-b6c5b0adcc2c?auto=format&fit=crop&q=80&w=800" 
-                 alt="Antoinette Williams" 
+                 alt="Antoinette McKinney" 
                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" 
                />
                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-60 group-hover:opacity-10 transition-opacity"></div>
