@@ -52,10 +52,10 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
           <div className="order-2 md:order-1">
              <span className="text-accent tracking-[0.4em] uppercase text-xs mb-4 block font-bold">The Founder</span>
-             <h2 className="text-5xl font-serif mb-2 text-white">Antoinette McKinney</h2>
+             <h2 className="text-5xl font-serif mb-2 text-white">Antoinette Williams</h2>
              <p className="text-accent tracking-[0.2em] uppercase text-[10px] font-bold mb-8">Executive Facilitator & Founder</p>
              <p className="text-lg opacity-70 leading-relaxed mb-6 font-serif italic">
-               Antoinette McKinney founded BrightPath on the conviction that strategic clarity and financial intelligence are not natural traits, but disciplines that can be mastered by the young.
+               Antoinette Williams founded BrightPath on the conviction that strategic clarity and financial intelligence are not natural traits, but disciplines that can be mastered by the young.
              </p>
              <p className="text-lg opacity-70 leading-relaxed mb-6">
                With a background in high-stakes strategy and diagnostic systems, Antoinette has spent her career bridging the gap between potential and performance. She created BrightPath to provide a rigorous, supportive environment where youth from every starting point can rise to the standard of executive authority.
@@ -68,7 +68,7 @@ const About: React.FC = () => {
             <div className="relative aspect-[4/5] bg-bgSoft/10 rounded-sm overflow-hidden shadow-2xl group">
                <img 
                  src="https://images.unsplash.com/photo-1567532939604-b6c5b0adcc2c?auto=format&fit=crop&q=80&w=800" 
-                 alt="Antoinette McKinney" 
+                 alt="Antoinette Williams" 
                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" 
                />
                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-60 group-hover:opacity-10 transition-opacity"></div>
